@@ -15,6 +15,7 @@ use move_core_types::{
 };
 use std::fmt::Debug;
 use std::{cmp::max, collections::BTreeMap};
+use serde::{Deserialize, Serialize};
 
 pub const TYPE_DEPTH_MAX: usize = 256;
 
@@ -194,10 +195,10 @@ impl CachedDatatype {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct CachedTypeIndex(pub usize);
 
-#[derive(Debug, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum Type {
     Bool,
     U8,

@@ -62,8 +62,8 @@ pub fn make_table_from_iter<S: Into<Box<str>>>(
         .collect()
 }
 
-pub(crate) struct NativeFunctions(
-    HashMap<AccountAddress, HashMap<String, HashMap<String, NativeFunction>>>,
+pub struct NativeFunctions(
+    pub HashMap<AccountAddress, HashMap<String, HashMap<String, NativeFunction>>>,
 );
 
 impl NativeFunctions {
@@ -104,7 +104,7 @@ pub struct NativeContext<'a, 'b> {
 }
 
 impl<'a, 'b> NativeContext<'a, 'b> {
-    pub(crate) fn new(
+    pub fn new(
         interpreter: &'a mut Interpreter,
         resolver: &'a Resolver<'a>,
         extensions: &'a mut NativeContextExtensions<'b>,
@@ -201,13 +201,15 @@ impl<'b> NativeContext<'_, 'b> {
 #[macro_export]
 macro_rules! native_charge_gas_early_exit {
     ($native_context:ident, $cost:expr) => {{
-        use move_core_types::vm_status::sub_status::NFE_OUT_OF_GAS;
-        if !$native_context.charge_gas($cost) {
-            // Exhausted all in budget. terminate early
-            return Ok(NativeResult::err(
-                $native_context.gas_budget(),
-                NFE_OUT_OF_GAS,
-            ));
+        if false {
+            use move_core_types::vm_status::sub_status::NFE_OUT_OF_GAS;
+            if !$native_context.charge_gas($cost) {
+                // Exhausted all in budget. terminate early
+                return Ok(NativeResult::err(
+                    $native_context.gas_budget(),
+                    NFE_OUT_OF_GAS,
+                ));
+            }
         }
     }};
 }
