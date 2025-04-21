@@ -62,7 +62,7 @@ macro_rules! set_err_info {
     }};
 }
 
-enum InstrRet {
+pub enum InstrRet {
     Ok,
     ExitCode(ExitCode),
     Branch,
@@ -805,7 +805,7 @@ impl Stack {
 
 /// A call stack.
 // #[derive(Debug)]
-pub(crate) struct CallStack(pub(crate) Vec<Frame>);
+pub struct CallStack(pub Vec<Frame>);
 
 impl CallStack {
     /// Create a new empty call stack.

@@ -189,7 +189,7 @@ impl ModuleCache {
             return Ok(cached);
         }
 
-        self.compiled_modules.insert(storage_id.clone(), module.clone());
+        let _ = self.compiled_modules.insert(storage_id.clone(), module.clone());
 
         // Make sure the modules of dependencies are in the cache.
         for runtime_dep in module.immediate_dependencies() {
@@ -407,7 +407,22 @@ impl ModuleCache {
 
         for (idx, func) in module.function_defs().iter().enumerate() {
             let findex = FunctionDefinitionIndex(idx as TableIndex);
-            let function = Function::new(natives, findex, func, module);
+            let mut function = Function::new(natives, findex, func, module);
+            function.return_types = module.signature_at(function.return_)
+                .0
+                .iter()
+                .map(|tok| self.make_type(module, tok))
+                .collect::<PartialVMResult<Vec<_>>>()?;
+            function.local_types = module.signature_at(function.locals)
+                .0
+                .iter()
+                .map(|tok| self.make_type(module, tok))
+                .collect::<PartialVMResult<Vec<_>>>()?;
+            function.parameter_types = module.signature_at(function.parameters)
+                .0
+                .iter()
+                .map(|tok| self.make_type(module, tok))
+                .collect::<PartialVMResult<Vec<_>>>()?;
             self.functions.push(Arc::new(function));
         }
 
@@ -2080,6 +2095,7 @@ pub struct Function {
     pub code: Vec<Bytecode>,
     pub parameters: SignatureIndex,
     pub return_: SignatureIndex,
+    pub locals: SignatureIndex,
     pub type_parameters: Vec<AbilitySet>,
     pub native: Option<NativeFunction>,
     pub def_is_native: bool,
@@ -2089,6 +2105,9 @@ pub struct Function {
     pub locals_len: usize,
     pub return_len: usize,
     pub jump_tables: Vec<VariantJumpTable>,
+    pub return_types: Vec<Type>,
+    pub local_types: Vec<Type>,
+    pub parameter_types: Vec<Type>,
 }
 
 impl Function {
@@ -2116,13 +2135,14 @@ impl Function {
         let parameters = handle.parameters;
         let parameters_len = module.signature_at(parameters).0.len();
         // Native functions do not have a code unit
-        let (code, locals_len, jump_tables) = match &def.code {
+        let (code, locals, locals_len, jump_tables) = match &def.code {
             Some(code) => (
                 code.code.clone(),
+                code.locals,
                 parameters_len + module.signature_at(code.locals).0.len(),
                 code.jump_tables.clone(),
             ),
-            None => (vec![], 0, vec![]),
+            None => (vec![], SignatureIndex::new(0), 0, vec![]),
         };
         let return_ = handle.return_;
         let return_len = module.signature_at(return_).0.len();
@@ -2133,6 +2153,7 @@ impl Function {
             code,
             parameters,
             return_,
+            locals,
             type_parameters,
             native,
             def_is_native,
@@ -2142,6 +2163,9 @@ impl Function {
             locals_len,
             return_len,
             jump_tables,
+            return_types: vec![],
+            local_types: vec![],
+            parameter_types: vec![],
         }
     }
 

@@ -23,7 +23,7 @@ use smallvec::SmallVec;
 use std::collections::BTreeMap;
 
 /// Internal state for the tracer. This is where the actual tracing logic is implemented.
-pub(crate) struct VMTracer<'a> {
+pub struct VMTracer<'a> {
     trace: &'a mut MoveTraceBuilder,
     link_context: Option<AccountAddress>,
     pc: Option<u16>,
