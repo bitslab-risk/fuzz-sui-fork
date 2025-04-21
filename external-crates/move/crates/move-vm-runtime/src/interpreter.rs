@@ -854,14 +854,14 @@ pub enum ExitCode {
 
 pub trait FuzzHook {
     fn on_enter(&mut self, interpreter: &Interpreter, frame: &Frame, pc: u16, instruction: &Bytecode);
-    fn on_leave(&mut self, interpreter: &Interpreter, frame: &Frame, pc: u16, instruction: &Bytecode, result: &InstrRet);
+    fn on_leave(&mut self, interpreter: &Interpreter, frame: &Frame, pc: u16, instruction: &Bytecode, result: Option<&InstrRet>);
 }
 
 pub struct DummyHook;
 
 impl FuzzHook for DummyHook {
     fn on_enter(&mut self, _interpreter: &Interpreter, _frame: &Frame, _pc: u16, _instruction: &Bytecode) {}
-    fn on_leave(&mut self, _interpreter: &Interpreter, _frame: &Frame, _pc: u16, _instruction: &Bytecode, _result: &InstrRet) {}
+    fn on_leave(&mut self, _interpreter: &Interpreter, _frame: &Frame, _pc: u16, _instruction: &Bytecode, _result: Option<&InstrRet>) {}
 }
 
 impl Frame {
@@ -1491,7 +1491,7 @@ impl Frame {
                     r.as_ref().err()
                 );
 
-                handler.on_leave(interpreter, self, self.pc, instruction, r.as_ref().unwrap());
+                handler.on_leave(interpreter, self, self.pc, instruction, r.as_ref().ok());
 
                 match r? {
                     InstrRet::Ok => (),
