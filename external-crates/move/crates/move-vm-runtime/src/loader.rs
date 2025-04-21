@@ -16,7 +16,7 @@ use move_binary_format::{
         FunctionInstantiationIndex, SignatureIndex, SignatureToken, StructDefInstantiationIndex,
         StructDefinitionIndex, StructFieldInformation, TableIndex, TypeParameterIndex,
         VariantHandle, VariantHandleIndex, VariantInstantiationHandle,
-        VariantInstantiationHandleIndex, VariantJumpTable, VariantTag,
+        VariantInstantiationHandleIndex, VariantJumpTable, VariantTag, Visibility,
     },
     IndexKind,
 };
@@ -1487,8 +1487,8 @@ impl Loader {
 
 // A simple wrapper for a `Module` in the `Resolver`
 pub struct BinaryType {
-    compiled: Arc<CompiledModule>,
-    loaded: Arc<LoadedModule>,
+    pub compiled: Arc<CompiledModule>,
+    pub loaded: Arc<LoadedModule>,
 }
 
 // A Resolver is a simple and small structure allocated on the stack and used by the
@@ -2099,6 +2099,8 @@ pub struct Function {
     pub type_parameters: Vec<AbilitySet>,
     pub native: Option<NativeFunction>,
     pub def_is_native: bool,
+    pub def_is_friend_or_private: bool,
+    pub def_is_entry: bool,
     pub module: ModuleId,
     pub name: Identifier,
     pub parameters_len: usize,
@@ -2120,6 +2122,8 @@ impl Function {
         let handle = module.function_handle_at(def.function);
         let name = module.identifier_at(handle.name).to_owned();
         let module_id = module.self_id();
+        let def_is_friend_or_private = def.visibility == Visibility::Private || def.visibility == Visibility::Friend;
+        let def_is_entry = def.is_entry;
         let (native, def_is_native) = if def.is_native() {
             (
                 natives.resolve(
@@ -2157,6 +2161,8 @@ impl Function {
             type_parameters,
             native,
             def_is_native,
+            def_is_friend_or_private,
+            def_is_entry,
             module: module_id,
             name,
             parameters_len,
@@ -2166,6 +2172,31 @@ impl Function {
             return_types: vec![],
             local_types: vec![],
             parameter_types: vec![],
+        }
+    }
+
+    pub fn new_dummy(parameter_types: Vec<Type>) -> Self {
+        Self {
+            file_format_version: 0,
+            index: Default::default(),
+            code: vec![],
+            parameters: Default::default(),
+            return_: Default::default(),
+            locals: Default::default(),
+            type_parameters: vec![],
+            native: None,
+            def_is_native: false,
+            def_is_friend_or_private: false,
+            def_is_entry: false,
+            module: ModuleId::new(AccountAddress::ZERO, Identifier::new("test").unwrap()),
+            name: Identifier::new("test").unwrap(),
+            parameters_len: parameter_types.len(),
+            locals_len: 0,
+            return_len: 0,
+            jump_tables: vec![],
+            return_types: vec![],
+            local_types: vec![],
+            parameter_types,
         }
     }
 

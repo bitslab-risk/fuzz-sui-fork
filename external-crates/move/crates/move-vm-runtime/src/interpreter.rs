@@ -809,12 +809,12 @@ pub struct CallStack(pub Vec<Frame>);
 
 impl CallStack {
     /// Create a new empty call stack.
-    fn new() -> Self {
+    pub fn new() -> Self {
         CallStack(vec![])
     }
 
     /// Push a `Frame` on the call stack.
-    fn push(&mut self, frame: Frame) -> ::std::result::Result<(), Frame> {
+    pub fn push(&mut self, frame: Frame) -> ::std::result::Result<(), Frame> {
         if self.0.len() < CALL_STACK_SIZE_LIMIT {
             self.0.push(frame);
             Ok(())
@@ -824,7 +824,7 @@ impl CallStack {
     }
 
     /// Pop a `Frame` off the call stack.
-    fn pop(&mut self) -> Option<Frame> {
+    pub fn pop(&mut self) -> Option<Frame> {
         self.0.pop()
     }
 
