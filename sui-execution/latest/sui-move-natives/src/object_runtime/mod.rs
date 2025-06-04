@@ -406,7 +406,7 @@ impl<'a> ObjectRuntime<'a> {
         })
     }
 
-    pub(crate) fn add_child_object(
+    pub fn add_child_object(
         &mut self,
         parent: ObjectID,
         child: ObjectID,

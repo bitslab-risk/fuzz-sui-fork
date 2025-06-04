@@ -2813,20 +2813,20 @@ impl Loader {
         Ok(annotated_type_layout)
     }
 
-    pub(crate) fn type_to_type_tag(&self, ty: &Type) -> PartialVMResult<TypeTag> {
+    pub fn type_to_type_tag(&self, ty: &Type) -> PartialVMResult<TypeTag> {
         self.type_to_type_tag_impl(ty, DatatypeTagType::Defining)
     }
 
-    pub(crate) fn type_to_runtime_type_tag(&self, ty: &Type) -> PartialVMResult<TypeTag> {
+    pub fn type_to_runtime_type_tag(&self, ty: &Type) -> PartialVMResult<TypeTag> {
         self.type_to_type_tag_impl(ty, DatatypeTagType::Runtime)
     }
 
-    pub(crate) fn type_to_type_layout(&self, ty: &Type) -> PartialVMResult<R::MoveTypeLayout> {
+    pub fn type_to_type_layout(&self, ty: &Type) -> PartialVMResult<R::MoveTypeLayout> {
         let mut count = 0;
         self.type_to_type_layout_impl(ty, &mut count, 1)
     }
 
-    pub(crate) fn type_to_fully_annotated_layout(
+    pub fn type_to_fully_annotated_layout(
         &self,
         ty: &Type,
     ) -> PartialVMResult<A::MoveTypeLayout> {
